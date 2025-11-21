@@ -1,0 +1,35 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "baseBuilder": {
+    "ownerAddress": "0x..."
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Macro Tracker",
+    "homeUrl": "https://macro-tracker.vercel.app",
+    "iconUrl": "https://macro-tracker.vercel.app/icon.png",
+    "splashImageUrl": "https://macro-tracker.vercel.app/splash.png",
+    "splashBackgroundColor": "#ffffff",
+    "subtitle": "Fitness & Nutrition on Base",
+    "description": "Track macros, earn rewards, and join fitness challenges on Base",
+    "screenshotUrls": [
+      "https://macro-tracker.vercel.app/screenshot-1.png",
+      "https://macro-tracker.vercel.app/screenshot-2.png",
+      "https://macro-tracker.vercel.app/screenshot-3.png"
+    ],
+    "primaryCategory": "health-fitness",
+    "tags": ["fitness", "macros", "nutrition", "health", "base"],
+    "heroImageUrl": "https://macro-tracker.vercel.app/hero.png",
+    "tagline": "Track macros, earn rewards",
+    "ogTitle": "Macro Tracker - Base Fitness & Nutrition",
+    "ogDescription": "Track macros, earn rewards, and join fitness challenges on Base",
+    "ogImageUrl": "https://macro-tracker.vercel.app/og-image.png",
+    "webhookUrl": "https://macro-tracker.vercel.app/api/webhook",
+    "noindex": true
+  }
+}
+
