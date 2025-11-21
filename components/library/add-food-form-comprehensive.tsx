@@ -1,7 +1,7 @@
 // components/library/add-food-form-comprehensive.tsx
 "use client";
 
-import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
+import { useState, useEffect, useImperativeHandle, forwardRef, useRef } from "react";
 import { ArrowLeft, Camera } from "lucide-react";
 
 interface AddFoodFormComprehensiveProps {

@@ -62,9 +62,9 @@ export function ProgressChart() {
             contentStyle={{ 
               backgroundColor: "white", 
               border: "1px solid #D9DEE7",
-              borderRadius: "8px"
+              borderRadius: "8px",
             }}
-            className="dark:bg-dark-card dark:border-dark-border"
+            labelStyle={{ color: "#000" }}
           />
           <Line 
             type="monotone" 
