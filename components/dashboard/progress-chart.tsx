@@ -60,11 +60,10 @@ export function ProgressChart() {
           />
           <Tooltip 
             contentStyle={{ 
-              backgroundColor: "white", 
-              border: "1px solid #D9DEE7",
+              backgroundColor: "white",
+              border: "1px solid #E5E7EB",
               borderRadius: "8px",
             }}
-            labelStyle={{ color: "#000" }}
           />
           <Line 
             type="monotone" 
