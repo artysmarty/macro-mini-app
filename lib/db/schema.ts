@@ -160,6 +160,52 @@ export async function deleteDiaryEntry(id: string): Promise<void> {
   db.diaryEntries.delete(id);
 }
 
+// Weight Log functions
+export async function getWeightLogs(userId: string): Promise<WeightLog[]> {
+  const logs: WeightLog[] = [];
+  for (const log of db.weightLogs.values()) {
+    if (log.userId === userId) {
+      logs.push(log);
+    }
+  }
+  return logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+}
+
+export async function createWeightLog(log: Omit<WeightLog, "id" | "createdAt">): Promise<WeightLog> {
+  const id = crypto.randomUUID();
+  const now = new Date();
+  const newLog: WeightLog = {
+    ...log,
+    id,
+    createdAt: now,
+  };
+  db.weightLogs.set(id, newLog);
+  return newLog;
+}
+
+// Measurement Log functions
+export async function getMeasurementLogs(userId: string): Promise<MeasurementLog[]> {
+  const logs: MeasurementLog[] = [];
+  for (const log of db.measurementLogs.values()) {
+    if (log.userId === userId) {
+      logs.push(log);
+    }
+  }
+  return logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+}
+
+export async function createMeasurementLog(log: Omit<MeasurementLog, "id" | "createdAt">): Promise<MeasurementLog> {
+  const id = crypto.randomUUID();
+  const now = new Date();
+  const newLog: MeasurementLog = {
+    ...log,
+    id,
+    createdAt: now,
+  };
+  db.measurementLogs.set(id, newLog);
+  return newLog;
+}
+
 // Export all helper functions
 export const dbHelpers = {
   getUserByWallet,
@@ -171,5 +217,9 @@ export const dbHelpers = {
   getDiaryEntries,
   createDiaryEntry,
   deleteDiaryEntry,
+  getWeightLogs,
+  createWeightLog,
+  getMeasurementLogs,
+  createMeasurementLog,
 };
 

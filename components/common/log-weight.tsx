@@ -3,7 +3,25 @@
 
 import { useState } from "react";
 import { BottomSheet } from "./bottom-sheet";
-import { X } from "lucide-react";
+import { useCreateWeightLog } from "@/hooks/use-weight-logs";
+import { useAuth } from "@/contexts/auth-context";
+import { format } from "date-fns";
+
+// Helper function to get consistent userId
+function getUserId(fid: number | null | undefined): string {
+  if (fid) {
+    return `fid-${fid}`;
+  }
+  if (typeof window !== 'undefined') {
+    let devUserId = localStorage.getItem('devUserId');
+    if (!devUserId) {
+      devUserId = `fid-dev-${Date.now()}`;
+      localStorage.setItem('devUserId', devUserId);
+    }
+    return devUserId;
+  }
+  return `fid-dev-${Date.now()}`;
+}
 
 interface LogWeightProps {
   isOpen: boolean;
@@ -11,13 +29,34 @@ interface LogWeightProps {
 }
 
 export function LogWeight({ isOpen, onClose }: LogWeightProps) {
+  const { fid } = useAuth();
+  const userId = getUserId(fid);
+  const createWeightLog = useCreateWeightLog();
   const [weight, setWeight] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async () => {
-    // TODO: Save weight to API
-    console.log("Log weight:", weight);
-    alert(`Weight logged: ${weight} kg`);
-    onClose();
+    const weightNum = parseFloat(weight);
+    if (!weight || weightNum <= 0) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await createWeightLog.mutateAsync({
+        userId,
+        date: format(new Date(), "yyyy-MM-dd"),
+        weight: weightNum,
+        source: "manual",
+      });
+      setWeight("");
+      onClose();
+    } catch (error) {
+      console.error("Error logging weight:", error);
+      alert("Failed to log weight. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -44,10 +83,10 @@ export function LogWeight({ isOpen, onClose }: LogWeightProps) {
 
         <button
           onClick={handleSubmit}
-          disabled={!weight || parseFloat(weight) <= 0}
+          disabled={!weight || parseFloat(weight) <= 0 || isSaving}
           className="w-full rounded-lg bg-primary px-4 py-4 text-base font-medium text-white transition-colors hover:bg-primary-hover disabled:opacity-50"
         >
-          Save
+          {isSaving ? "Saving..." : "Save"}
         </button>
       </div>
     </BottomSheet>

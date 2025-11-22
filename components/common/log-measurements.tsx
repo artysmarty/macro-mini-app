@@ -3,6 +3,26 @@
 
 import { useState } from "react";
 import { BottomSheet } from "./bottom-sheet";
+import { useCreateMeasurementLog } from "@/hooks/use-measurement-logs";
+import { useAuth } from "@/contexts/auth-context";
+import { format } from "date-fns";
+import type { BodyMeasurements } from "@/types";
+
+// Helper function to get consistent userId
+function getUserId(fid: number | null | undefined): string {
+  if (fid) {
+    return `fid-${fid}`;
+  }
+  if (typeof window !== 'undefined') {
+    let devUserId = localStorage.getItem('devUserId');
+    if (!devUserId) {
+      devUserId = `fid-dev-${Date.now()}`;
+      localStorage.setItem('devUserId', devUserId);
+    }
+    return devUserId;
+  }
+  return `fid-dev-${Date.now()}`;
+}
 
 interface LogMeasurementsProps {
   isOpen: boolean;
@@ -22,6 +42,9 @@ const measurementLabels: Record<MeasurementType, string> = {
 };
 
 export function LogMeasurements({ isOpen, onClose }: LogMeasurementsProps) {
+  const { fid } = useAuth();
+  const userId = getUserId(fid);
+  const createMeasurementLog = useCreateMeasurementLog();
   const [measurements, setMeasurements] = useState<Record<MeasurementType, string>>({
     "arms-left": "",
     "arms-right": "",
@@ -31,16 +54,63 @@ export function LogMeasurements({ isOpen, onClose }: LogMeasurementsProps) {
     "thighs-left": "",
     "thighs-right": "",
   });
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleMeasurementChange = (type: MeasurementType, value: string) => {
     setMeasurements((prev) => ({ ...prev, [type]: value }));
   };
 
   const handleSubmit = async () => {
-    // TODO: Save measurements to API
-    console.log("Log measurements:", measurements);
-    alert("Measurements saved!");
-    onClose();
+    // Convert measurements to BodyMeasurements format
+    // Calculate average for arms and thighs if both sides are provided
+    const armsLeft = parseFloat(measurements["arms-left"]) || 0;
+    const armsRight = parseFloat(measurements["arms-right"]) || 0;
+    const arms = armsLeft && armsRight ? (armsLeft + armsRight) / 2 : (armsLeft || armsRight);
+    
+    const thighsLeft = parseFloat(measurements["thighs-left"]) || 0;
+    const thighsRight = parseFloat(measurements["thighs-right"]) || 0;
+    const thighs = thighsLeft && thighsRight ? (thighsLeft + thighsRight) / 2 : (thighsLeft || thighsRight);
+
+    const bodyMeasurements: BodyMeasurements = {
+      waist: parseFloat(measurements.waist) || undefined,
+      hips: parseFloat(measurements.hips) || undefined,
+      chest: undefined, // Not in the form, but can be added later
+      arms: arms || undefined,
+      thighs: thighs || undefined,
+      butt: parseFloat(measurements.butt) || undefined,
+    };
+
+    // Check if at least one measurement is provided
+    const hasAnyMeasurement = Object.values(bodyMeasurements).some(v => v !== undefined);
+    if (!hasAnyMeasurement) {
+      alert("Please enter at least one measurement.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await createMeasurementLog.mutateAsync({
+        userId,
+        date: format(new Date(), "yyyy-MM-dd"),
+        measurements: bodyMeasurements,
+      });
+      // Reset form
+      setMeasurements({
+        "arms-left": "",
+        "arms-right": "",
+        waist: "",
+        hips: "",
+        butt: "",
+        "thighs-left": "",
+        "thighs-right": "",
+      });
+      onClose();
+    } catch (error) {
+      console.error("Error logging measurements:", error);
+      alert("Failed to log measurements. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const measurementTypes: MeasurementType[] = [
@@ -80,9 +150,10 @@ export function LogMeasurements({ isOpen, onClose }: LogMeasurementsProps) {
 
         <button
           onClick={handleSubmit}
-          className="w-full rounded-lg bg-primary px-4 py-4 text-base font-medium text-white transition-colors hover:bg-primary-hover"
+          disabled={isSaving}
+          className="w-full rounded-lg bg-primary px-4 py-4 text-base font-medium text-white transition-colors hover:bg-primary-hover disabled:opacity-50"
         >
-          Save All
+          {isSaving ? "Saving..." : "Save All"}
         </button>
       </div>
     </BottomSheet>

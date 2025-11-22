@@ -3,12 +3,39 @@
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
+import { useWeightLogs } from "@/hooks/use-weight-logs";
+import { useAuth } from "@/contexts/auth-context";
 
-// Empty - weight data will be fetched from API
-const mockWeightData: Array<{ date: string; weight: number }> = [];
+// Helper function to get consistent userId
+function getUserId(fid: number | null | undefined): string {
+  if (fid) {
+    return `fid-${fid}`;
+  }
+  if (typeof window !== 'undefined') {
+    let devUserId = localStorage.getItem('devUserId');
+    if (!devUserId) {
+      devUserId = `fid-dev-${Date.now()}`;
+      localStorage.setItem('devUserId', devUserId);
+    }
+    return devUserId;
+  }
+  return `fid-dev-${Date.now()}`;
+}
 
 export function ProgressChart() {
-  if (mockWeightData.length === 0) {
+  const { fid } = useAuth();
+  const userId = getUserId(fid);
+  const { data: weightLogs = [], isLoading } = useWeightLogs(userId);
+
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-gray-300 bg-white p-8 text-center shadow-card dark:border-dark-border dark:bg-dark-card dark:shadow-card-dark">
+        <p className="text-sm text-gray-500 dark:text-gray-400">Loading weight data...</p>
+      </div>
+    );
+  }
+
+  if (weightLogs.length === 0) {
     return (
       <div className="rounded-xl border border-gray-300 bg-white p-8 text-center shadow-card dark:border-dark-border dark:bg-dark-card dark:shadow-card-dark">
         <p className="text-sm text-gray-500 dark:text-gray-400">No weight data yet</p>
@@ -16,13 +43,13 @@ export function ProgressChart() {
     );
   }
 
-  const data = mockWeightData.map((item) => ({
-    ...item,
-    date: format(new Date(item.date), "MMM d"),
+  const data = weightLogs.map((log) => ({
+    date: format(new Date(log.date), "MMM d"),
+    weight: log.weight,
   }));
 
-  const latest = mockWeightData[mockWeightData.length - 1];
-  const previous = mockWeightData[0];
+  const latest = weightLogs[weightLogs.length - 1];
+  const previous = weightLogs[0];
   const change = latest.weight - previous.weight;
   const changePercent = ((change / previous.weight) * 100).toFixed(1);
 

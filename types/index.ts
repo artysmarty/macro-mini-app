@@ -23,6 +23,7 @@ export interface BodyMeasurements {
   hips?: number; // cm
   arms?: number; // cm
   thighs?: number; // cm
+  butt?: number; // cm
 }
 
 export interface MacroProfile {

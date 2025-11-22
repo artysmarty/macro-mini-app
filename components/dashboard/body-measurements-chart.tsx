@@ -4,9 +4,24 @@
 import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { format } from "date-fns";
+import { useMeasurementLogs } from "@/hooks/use-measurement-logs";
+import { useAuth } from "@/contexts/auth-context";
 
-// Empty - measurement data will be fetched from API
-const mockMeasurementData: Array<{ date: string; butt: number; waist: number; chest: number; arms: number; hips: number; thighs: number }> = [];
+// Helper function to get consistent userId
+function getUserId(fid: number | null | undefined): string {
+  if (fid) {
+    return `fid-${fid}`;
+  }
+  if (typeof window !== 'undefined') {
+    let devUserId = localStorage.getItem('devUserId');
+    if (!devUserId) {
+      devUserId = `fid-dev-${Date.now()}`;
+      localStorage.setItem('devUserId', devUserId);
+    }
+    return devUserId;
+  }
+  return `fid-dev-${Date.now()}`;
+}
 
 type MeasurementKey = "butt" | "waist" | "chest" | "arms" | "hips" | "thighs";
 
@@ -23,6 +38,9 @@ function calculatePercentageChange(current: number, previous: number): number {
 }
 
 export function BodyMeasurementsChart() {
+  const { fid } = useAuth();
+  const userId = getUserId(fid);
+  const { data: measurementLogs = [], isLoading } = useMeasurementLogs(userId);
   const [enabledMeasurements, setEnabledMeasurements] = useState<Record<MeasurementKey, boolean>>({
     butt: true,
     waist: true,
@@ -32,7 +50,15 @@ export function BodyMeasurementsChart() {
     thighs: true,
   });
 
-  if (mockMeasurementData.length === 0) {
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-gray-300 bg-white p-8 text-center shadow-card dark:border-dark-border dark:bg-dark-card dark:shadow-card-dark">
+        <p className="text-sm text-gray-500 dark:text-gray-400">Loading measurement data...</p>
+      </div>
+    );
+  }
+
+  if (measurementLogs.length === 0) {
     return (
       <div className="rounded-xl border border-gray-300 bg-white p-8 text-center shadow-card dark:border-dark-border dark:bg-dark-card dark:shadow-card-dark">
         <p className="text-sm text-gray-500 dark:text-gray-400">No measurement data yet</p>
@@ -40,13 +66,27 @@ export function BodyMeasurementsChart() {
     );
   }
 
-  const data = mockMeasurementData.map((item) => ({
-    ...item,
-    date: format(new Date(item.date), "MMM d"),
-  }));
+  // Transform measurement logs into chart data format
+  const data = measurementLogs.map((log) => {
+    const m = log.measurements;
+    
+    return {
+      date: format(new Date(log.date), "MMM d"),
+      butt: m.butt || 0,
+      waist: m.waist || 0,
+      chest: m.chest || 0,
+      arms: m.arms || 0,
+      hips: m.hips || 0,
+      thighs: m.thighs || 0,
+    };
+  });
 
-  const latest = mockMeasurementData[mockMeasurementData.length - 1];
-  const previous = mockMeasurementData[0];
+  const latest = measurementLogs[measurementLogs.length - 1];
+  const previous = measurementLogs[0];
+  
+  // Calculate changes from measurements
+  const latestMeasurements = latest.measurements;
+  const previousMeasurements = previous.measurements;
 
   const measurements: MeasurementConfig[] = [
     { key: "butt", label: "Butt", color: "#6366f1", enabled: enabledMeasurements.butt },
@@ -58,12 +98,12 @@ export function BodyMeasurementsChart() {
   ];
 
   const changes: Record<MeasurementKey, number> = {
-    butt: calculatePercentageChange(latest.butt, previous.butt),
-    waist: calculatePercentageChange(latest.waist, previous.waist),
-    chest: calculatePercentageChange(latest.chest, previous.chest),
-    arms: calculatePercentageChange(latest.arms, previous.arms),
-    hips: calculatePercentageChange(latest.hips, previous.hips),
-    thighs: calculatePercentageChange(latest.thighs, previous.thighs),
+    butt: calculatePercentageChange(latestMeasurements.butt || 0, previousMeasurements.butt || 0),
+    waist: calculatePercentageChange(latestMeasurements.waist || 0, previousMeasurements.waist || 0),
+    chest: calculatePercentageChange(latestMeasurements.chest || 0, previousMeasurements.chest || 0),
+    arms: calculatePercentageChange(latestMeasurements.arms || 0, previousMeasurements.arms || 0),
+    hips: calculatePercentageChange(latestMeasurements.hips || 0, previousMeasurements.hips || 0),
+    thighs: calculatePercentageChange(latestMeasurements.thighs || 0, previousMeasurements.thighs || 0),
   };
 
   const toggleMeasurement = (key: MeasurementKey) => {
