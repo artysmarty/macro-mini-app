@@ -9,9 +9,10 @@ interface BottomSheetProps {
   onClose: () => void;
   title?: string;
   children: ReactNode;
+  centered?: boolean; // New prop to enable centered mode
 }
 
-export function BottomSheet({ isOpen, onClose, title, children }: BottomSheetProps) {
+export function BottomSheet({ isOpen, onClose, title, children, centered = false }: BottomSheetProps) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -25,6 +26,46 @@ export function BottomSheet({ isOpen, onClose, title, children }: BottomSheetPro
 
   if (!isOpen) return null;
 
+  // Centered mode (for Food Detail Sheet)
+  if (centered) {
+    return (
+      <>
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 z-40 bg-black/50"
+          onClick={onClose}
+        />
+        
+        {/* Centered Sheet */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+          <div 
+            className="w-full max-w-md max-h-[90vh] rounded-2xl bg-white shadow-2xl dark:bg-dark-card overflow-hidden pointer-events-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            {title && (
+              <div className="flex items-center justify-between border-b border-gray-300 px-4 py-3 dark:border-dark-border">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text">{title}</h2>
+                <button
+                  onClick={onClose}
+                  className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-gray-200 dark:hover:bg-dark-hover"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            )}
+            
+            {/* Content */}
+            <div className="max-h-[calc(90vh-80px)] overflow-y-auto p-4">
+              {children}
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Bottom-anchored mode (default, for backward compatibility)
   return (
     <>
       {/* Backdrop */}

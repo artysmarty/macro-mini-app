@@ -2,14 +2,19 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { format } from "date-fns";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { DiaryEntryList } from "./diary-entry-list";
-import { MealSuggestions } from "@/components/ai/meal-suggestions";
 import { MealActionsMenu } from "./meal-actions-menu";
 import { ShareMealModal } from "./share-meal-modal";
+import { useDiaryEntries } from "@/hooks/use-diary-entries";
+import { useMacroLog } from "@/hooks/use-macro-log";
+import { useAuth } from "@/contexts/auth-context";
+import type { DiaryEntry } from "@/types";
 
 interface MealSectionProps {
   mealType: "breakfast" | "lunch" | "dinner" | "snacks";
+  selectedDate?: Date;
   onAddClick?: () => void;
 }
 
@@ -28,24 +33,89 @@ const mockMealMacros: Record<MealSectionProps["mealType"], { calories: number; p
   snacks: { calories: 180, protein: 8, carbs: 20, fat: 6 },
 };
 
-export function MealSection({ mealType, onAddClick }: MealSectionProps) {
+export function MealSection({ mealType, selectedDate = new Date(), onAddClick }: MealSectionProps) {
+  const { fid } = useAuth();
   const label = mealLabels[mealType];
-  const [showAI, setShowAI] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
   
-  // Mock meal data for sharing - will be replaced with actual diary entries
-  const mealEntries: any[] = []; // TODO: Get actual entries for this meal type
-  const hasEntries = mealEntries.length > 0;
-  const mealMacros = mockMealMacros[mealType];
+  const date = format(selectedDate, "yyyy-MM-dd");
+  
+  // Use consistent userId - match the logic from DiaryPage
+  const getUserId = () => {
+    if (fid) {
+      return `fid-${fid}`;
+    }
+    // Use the same dev userId from localStorage (same as DiaryPage)
+    if (typeof window !== 'undefined') {
+      const devUserId = localStorage.getItem('devUserId');
+      return devUserId || "";
+    }
+    return "";
+  };
+  
+  const userId = getUserId();
+  const { data: entries = [], isLoading, error } = useDiaryEntries(userId, date, mealType);
+  const { data: macroLog } = useMacroLog(date, userId);
+  
+  console.log("MealSection:", {
+    mealType,
+    date,
+    userId,
+    entriesCount: entries.length,
+    entries: entries.map(e => ({ id: e.id, type: e.type, foodItemId: e.foodItemId, mealType: e.mealType })),
+    isLoading,
+    error
+  });
+  
+  // Also log the API call being made
+  console.log("Fetching diary entries with params:", {
+    userId,
+    date,
+    mealType,
+    url: `/api/diary-entries?userId=${encodeURIComponent(userId)}&date=${date}&mealType=${mealType}`
+  });
+  
+  // If there's an error, log it but continue rendering
+  if (error) {
+    console.error("Error fetching diary entries:", error);
+  }
+  
+  const hasEntries = entries.length > 0;
+  
+  // Calculate meal macros from entries
+  // Entries are enriched with foodItem data from the API
+  const mealMacros = (entries as any[]).reduce(
+    (acc, entry: DiaryEntry & { foodItem?: any }) => {
+      if (entry.type === "quick") {
+        acc.calories += (entry.quickCalories || 0) * (entry.quantity || 1);
+        acc.protein += (entry.quickProteinG || 0) * (entry.quantity || 1);
+        acc.carbs += (entry.quickCarbsG || 0) * (entry.quantity || 1);
+        acc.fat += (entry.quickFatsG || 0) * (entry.quantity || 1);
+      } else if (entry.foodItemId && (entry as any).foodItem) {
+        // Use food item data from enriched entry
+        const foodItem = (entry as any).foodItem;
+        const quantity = entry.quantity || 1;
+        acc.calories += (foodItem.calories || 0) * quantity;
+        acc.protein += (foodItem.proteinG || 0) * quantity;
+        acc.carbs += (foodItem.carbsG || 0) * quantity;
+        acc.fat += (foodItem.fatsG || 0) * quantity;
+      }
+      return acc;
+    },
+    { calories: 0, protein: 0, carbs: 0, fat: 0 }
+  );
+  
+  // Always use calculated macros (show 0 if no entries)
+  const displayMacros = mealMacros;
 
   return (
     <>
       <div className="rounded-xl border border-gray-300 bg-white shadow-card dark:border-dark-border dark:bg-dark-card dark:shadow-card-dark">
         {/* Header - Clickable to toggle */}
-        <button
+        <div
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex w-full items-center justify-between border-b border-gray-300 px-4 py-3 dark:border-dark-border"
+          className="flex w-full items-center justify-between border-b border-gray-300 px-4 py-3 cursor-pointer dark:border-dark-border"
         >
           <div className="flex items-center gap-2">
             {isExpanded ? (
@@ -55,50 +125,34 @@ export function MealSection({ mealType, onAddClick }: MealSectionProps) {
             )}
             <h3 className="font-semibold capitalize text-gray-900 dark:text-dark-text">{label}</h3>
           </div>
-          <div className="flex items-center gap-3">
+          <div 
+            className="flex items-center gap-3"
+            onClick={(e) => e.stopPropagation()} // Prevent header toggle when clicking menu
+          >
             <MealActionsMenu
-              onAIClick={() => {
-                setShowAI(!showAI);
-              }}
-              onAddClick={() => {
-                onAddClick?.();
-              }}
               onShareClick={() => {
                 setShowShareModal(true);
               }}
             />
           </div>
-        </button>
+        </div>
 
         {/* Body - Collapsible */}
         {isExpanded && (
           <div className="p-4">
-            {showAI && (
-              <div className="mb-4">
-                <MealSuggestions
-                  onSelectMeal={(meal) => {
-                    // TODO: Add meal to diary
-                    console.log("Log meal:", meal);
-                    setShowAI(false);
-                  }}
-                />
-              </div>
-            )}
-
-            {hasEntries ? (
-              <DiaryEntryList mealType={mealType} />
+            {hasEntries && userId ? (
+              <DiaryEntryList mealType={mealType} selectedDate={selectedDate} />
             ) : null}
 
-            {/* Footer - Add Button */}
+            {/* Footer - Add Button - Always visible */}
             <div className="mt-4 border-t border-gray-300 pt-3 dark:border-dark-border">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onAddClick?.();
                 }}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-medium text-white transition-colors hover:bg-primary-hover"
+                className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-3 font-medium text-white transition-colors hover:bg-primary-hover"
               >
-                <Plus className="h-5 w-5" />
                 <span>Add</span>
               </button>
             </div>
@@ -111,25 +165,25 @@ export function MealSection({ mealType, onAddClick }: MealSectionProps) {
             <div>
               <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Cal</div>
               <div className="text-sm font-bold text-gray-900 dark:text-dark-text">
-                {mealMacros.calories}
+                {Math.round(displayMacros.calories)}
               </div>
             </div>
             <div>
               <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Protein</div>
               <div className="text-sm font-bold text-gray-900 dark:text-dark-text">
-                {mealMacros.protein}g
+                {Math.round(displayMacros.protein)}g
               </div>
             </div>
             <div>
               <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Carbs</div>
               <div className="text-sm font-bold text-gray-900 dark:text-dark-text">
-                {mealMacros.carbs}g
+                {Math.round(displayMacros.carbs)}g
               </div>
             </div>
             <div>
               <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Fat</div>
               <div className="text-sm font-bold text-gray-900 dark:text-dark-text">
-                {mealMacros.fat}g
+                {Math.round(displayMacros.fat)}g
               </div>
             </div>
           </div>
@@ -139,7 +193,7 @@ export function MealSection({ mealType, onAddClick }: MealSectionProps) {
       {showShareModal && (
         <ShareMealModal
           mealType={mealType}
-          entries={mealEntries}
+          entries={entries}
           onClose={() => setShowShareModal(false)}
         />
       )}

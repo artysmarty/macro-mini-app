@@ -1,8 +1,9 @@
 // components/dashboard/macro-summary-bar.tsx
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useMacroLog } from "@/hooks/use-macro-log";
+import { useAuth } from "@/contexts/auth-context";
 import { format } from "date-fns";
 
 interface CircularProgressProps {
@@ -16,7 +17,7 @@ interface CircularProgressProps {
 
 function CircularProgress({ consumed, target, color, label, unit, showRemainder = true }: CircularProgressProps) {
   const percentage = Math.min((consumed / target) * 100, 100);
-  const remainder = Math.max(target - consumed, 0);
+  const remaining = Math.max(target - consumed, 0);
   const radius = 40; // 40px radius
   const circumference = 2 * Math.PI * radius;
   const strokeDasharray = circumference;
@@ -53,19 +54,19 @@ function CircularProgress({ consumed, target, color, label, unit, showRemainder 
           {showRemainder ? (
             <>
               <div className="text-base font-bold text-gray-900 dark:text-dark-text">
-                {consumed.toFixed(0)}
+                {remaining.toFixed(0)}
               </div>
               <div className="text-[10px] font-medium text-gray-600 dark:text-gray-400">
-                /{target.toFixed(0)}
+                remaining
               </div>
             </>
           ) : (
             <>
               <div className="text-base font-bold" style={{ color }}>
-                {consumed.toFixed(consumed < 10 ? 1 : 0)}
+                {remaining.toFixed(remaining < 10 ? 1 : 0)}
               </div>
               <div className="text-[10px] font-medium text-gray-600 dark:text-gray-400">
-                /{target.toFixed(target < 10 ? 1 : 0)}
+                remaining
               </div>
             </>
           )}
@@ -78,11 +79,36 @@ function CircularProgress({ consumed, target, color, label, unit, showRemainder 
 
 interface MacroSummaryBarProps {
   onLogFoodClick?: () => void;
+  date?: Date; // Optional date prop - defaults to today
 }
 
-export function MacroSummaryBar({ onLogFoodClick }: MacroSummaryBarProps) {
-  const today = format(new Date(), "yyyy-MM-dd");
-  const { data: macroLog, isLoading } = useMacroLog(today);
+export function MacroSummaryBar({ onLogFoodClick, date }: MacroSummaryBarProps) {
+  const { fid } = useAuth();
+  // Use provided date or default to today
+  const displayDate = date || new Date();
+  const dateString = format(displayDate, "yyyy-MM-dd");
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Use consistent userId - match the logic from DiaryPage
+  const getUserId = () => {
+    if (fid) {
+      return `fid-${fid}`;
+    }
+    // Use the same dev userId from localStorage (only on client)
+    if (typeof window !== 'undefined' && isMounted) {
+      const devUserId = localStorage.getItem('devUserId');
+      return devUserId || "";
+    }
+    return "";
+  };
+  
+  // Only get userId after component mounts to avoid hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
+  const userId = getUserId();
+  const { data: macroLog, isLoading } = useMacroLog(dateString, userId);
   const [viewIndex, setViewIndex] = useState(0); // 0 = macros, 1 = micros
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
@@ -134,10 +160,44 @@ export function MacroSummaryBar({ onLogFoodClick }: MacroSummaryBarProps) {
     }
   };
 
-  if (isLoading) {
+  // Don't show loading state until component is mounted to avoid hydration mismatch
+  // Instead, show the default values (0 consumed)
+  if (!isMounted || isLoading) {
     return (
-      <div className="border-b border-gray-300 bg-gray-100 px-4 py-3 dark:border-dark-border dark:bg-dark-card">
-        <div className="text-sm text-gray-600 dark:text-gray-400">Loading macros...</div>
+      <div className="border-b border-gray-300 bg-white py-6 dark:border-dark-border dark:bg-dark-card overflow-hidden">
+        <div className="flex w-full items-center transition-transform duration-300" style={{ transform: `translateX(-${viewIndex * 100}%)` }}>
+          {/* Macros View - Show with 0 values during loading */}
+          <div className="flex min-w-full items-center px-4 justify-between">
+            <CircularProgress
+              consumed={0}
+              target={targetMacros.calories}
+              color="#28CC8B"
+              label="Cal"
+              unit="kcal"
+            />
+            <CircularProgress
+              consumed={0}
+              target={targetMacros.protein}
+              color="#3A7BFF"
+              label="Protein"
+              unit="g"
+            />
+            <CircularProgress
+              consumed={0}
+              target={targetMacros.carbs}
+              color="#67C8FF"
+              label="Carbs"
+              unit="g"
+            />
+            <CircularProgress
+              consumed={0}
+              target={targetMacros.fats}
+              color="#FFB74D"
+              label="Fat"
+              unit="g"
+            />
+          </div>
+        </div>
       </div>
     );
   }
@@ -209,7 +269,6 @@ export function MacroSummaryBar({ onLogFoodClick }: MacroSummaryBarProps) {
             unit="g"
             showRemainder={false}
           />
-          <div className="flex-1" /> {/* Spacer to match 4 items layout */}
         </div>
       </div>
 

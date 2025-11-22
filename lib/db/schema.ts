@@ -91,6 +91,46 @@ export async function createOrUpdateMacroLog(log: MacroLog): Promise<MacroLog> {
   return log;
 }
 
+export async function getDiaryEntries(
+  userId: string,
+  date: string,
+  mealType?: "breakfast" | "lunch" | "dinner" | "snacks"
+): Promise<DiaryEntry[]> {
+  const entries: DiaryEntry[] = [];
+  console.log(`getDiaryEntries called: userId=${userId}, date=${date}, mealType=${mealType || 'all'}`);
+  console.log(`Total entries in DB: ${db.diaryEntries.size}`);
+  
+  for (const entry of db.diaryEntries.values()) {
+    console.log(`Checking entry: id=${entry.id}, userId=${entry.userId}, date=${entry.date}, mealType=${entry.mealType}`);
+    if (entry.userId === userId && entry.date === date) {
+      if (!mealType || entry.mealType === mealType) {
+        entries.push(entry);
+      }
+    }
+  }
+  
+  console.log(`Found ${entries.length} matching entries`);
+  return entries.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+}
+
+export async function createDiaryEntry(
+  entry: Omit<DiaryEntry, "id" | "createdAt">
+): Promise<DiaryEntry> {
+  const id = crypto.randomUUID();
+  const now = new Date();
+  const newEntry: DiaryEntry = {
+    ...entry,
+    id,
+    createdAt: now,
+  };
+  db.diaryEntries.set(id, newEntry);
+  return newEntry;
+}
+
+export async function deleteDiaryEntry(id: string): Promise<void> {
+  db.diaryEntries.delete(id);
+}
+
 // Export all helper functions
 export const dbHelpers = {
   getUserByWallet,
@@ -99,5 +139,8 @@ export const dbHelpers = {
   createMacroProfile,
   getMacroLog,
   createOrUpdateMacroLog,
+  getDiaryEntries,
+  createDiaryEntry,
+  deleteDiaryEntry,
 };
 

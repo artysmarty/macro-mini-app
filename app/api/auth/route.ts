@@ -2,9 +2,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, Errors } from "@farcaster/quick-auth";
 
-const domain = process.env.NEXT_PUBLIC_APP_URL 
-  ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname
-  : "localhost";
+// Get domain from environment or use localhost for development
+const getDomain = () => {
+  const url = process.env.NEXT_PUBLIC_APP_URL;
+  if (url) {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return url;
+    }
+  }
+  return process.env.NODE_ENV === "production" ? "macro-tracker.vercel.app" : "localhost";
+};
+
+const domain = getDomain();
 
 const client = createClient();
 

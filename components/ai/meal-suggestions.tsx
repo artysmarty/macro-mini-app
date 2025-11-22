@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, ChefHat } from "lucide-react";
+import { Sparkles, ChefHat, Copy, Check } from "lucide-react";
 import { useMacroLog } from "@/hooks/use-macro-log";
 import { format } from "date-fns";
 import { useAccount } from "wagmi";
@@ -88,6 +88,19 @@ export function MealSuggestions({ onSelectMeal }: MealSuggestionsProps) {
   const { address } = useAccount();
   const today = format(new Date(), "yyyy-MM-dd");
   const { data: macroLog } = useMacroLog(today);
+  const [copiedMealIndex, setCopiedMealIndex] = useState<number | null>(null);
+  
+  // Copy recipe instructions to clipboard
+  const handleCopyRecipe = async (instructions: string, mealIndex: number) => {
+    try {
+      await navigator.clipboard.writeText(instructions);
+      setCopiedMealIndex(mealIndex);
+      setTimeout(() => setCopiedMealIndex(null), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+      alert("Failed to copy recipe. Please try again.");
+    }
+  };
   const [ingredients, setIngredients] = useState("");
   const [suggestions, setSuggestions] = useState<MealSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
@@ -198,8 +211,8 @@ export function MealSuggestions({ onSelectMeal }: MealSuggestionsProps) {
               key={index}
               className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
             >
-              <div className="mb-3 flex items-start justify-between">
-                <div>
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="flex-1">
                   <div className="mb-1 flex items-center gap-2">
                     <ChefHat className="h-4 w-4 text-orange-500" />
                     <h5 className="font-semibold">{meal.name}</h5>
@@ -208,6 +221,23 @@ export function MealSuggestions({ onSelectMeal }: MealSuggestionsProps) {
                     Portion: {meal.portionSize}
                   </p>
                 </div>
+                <button
+                  onClick={() => handleCopyRecipe(meal.instructions, index)}
+                  className="flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10 dark:text-primary-light dark:hover:bg-primary/20 transition-colors whitespace-nowrap"
+                  title="Copy recipe instructions to clipboard"
+                >
+                  {copiedMealIndex === index ? (
+                    <>
+                      <Check className="h-3 w-3 text-green-600" />
+                      <span className="text-green-600">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3 w-3" />
+                      <span>Copy Recipe</span>
+                    </>
+                  )}
+                </button>
               </div>
 
               <div className="mb-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">

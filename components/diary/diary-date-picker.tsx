@@ -1,14 +1,22 @@
 // components/diary/diary-date-picker.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { MonthlyCalendarView } from "./monthly-calendar-view";
 
-export function DiaryDatePicker() {
+interface DiaryDatePickerProps {
+  onDateChange?: (date: Date) => void;
+}
+
+export function DiaryDatePicker({ onDateChange }: DiaryDatePickerProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
+
+  useEffect(() => {
+    onDateChange?.(selectedDate);
+  }, [selectedDate, onDateChange]);
 
   const previousDay = () => {
     const newDate = new Date(selectedDate);

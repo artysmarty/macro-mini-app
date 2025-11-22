@@ -49,7 +49,7 @@ export function FoodLibrary({ initialView }: FoodLibraryProps) {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search foods, meals, recipes..."
+            placeholder="Search foods, recipes..."
             className="w-full rounded-xl border border-gray-300 bg-gray-100 px-10 py-3 text-sm focus:border-primary focus:bg-white focus:outline-none dark:border-dark-border dark:bg-dark-card dark:text-dark-text dark:focus:border-primary"
           />
         </div>

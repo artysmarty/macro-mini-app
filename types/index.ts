@@ -116,6 +116,8 @@ export interface DiaryEntry {
   quickProteinG?: number;
   quickCarbsG?: number;
   quickFatsG?: number;
+  quickName?: string; // Name for quick add entries (e.g., "Bread")
+  quickInstructions?: string; // Recipe instructions for AI meals
   quantity?: number;
   createdAt: Date;
 }

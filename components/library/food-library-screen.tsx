@@ -8,7 +8,7 @@ import { FoodDetailSheet } from "./food-detail-sheet";
 import { ShareFood } from "@/components/sharing/share-food";
 import type { FoodItem } from "@/types";
 
-type CategoryFilter = "all" | "foods" | "meals" | "recipes";
+type CategoryFilter = "all" | "foods" | "recipes";
 
 // Mock foods - will be replaced with API data
 const mockFoods: FoodItem[] = [
@@ -48,7 +48,7 @@ const mockFoods: FoodItem[] = [
 ];
 
 interface FoodLibraryScreenProps {
-  onAddToMeal?: (foodItem: FoodItem, mealType: "breakfast" | "lunch" | "dinner" | "snacks") => void;
+  onAddToMeal?: (foodItem: FoodItem, mealType: "breakfast" | "lunch" | "dinner" | "snacks", quantity?: number) => void;
   onQuickAdd?: (foodItem: FoodItem) => void;
 }
 
@@ -56,6 +56,7 @@ export function FoodLibraryScreen({ onAddToMeal, onQuickAdd }: FoodLibraryScreen
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("all");
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
+  const [showLogSheet, setShowLogSheet] = useState(false);
   const [foods] = useState<FoodItem[]>(mockFoods);
 
   const filteredFoods = foods.filter((food) => {
@@ -67,7 +68,6 @@ export function FoodLibraryScreen({ onAddToMeal, onQuickAdd }: FoodLibraryScreen
   const categories: { id: CategoryFilter; label: string }[] = [
     { id: "all", label: "All" },
     { id: "foods", label: "Foods" },
-    { id: "meals", label: "Meals" },
     { id: "recipes", label: "Recipes" },
   ];
 
@@ -77,8 +77,14 @@ export function FoodLibraryScreen({ onAddToMeal, onQuickAdd }: FoodLibraryScreen
 
   const handleAdd = (e: React.MouseEvent, food: FoodItem) => {
     e.stopPropagation();
-    // Open detail sheet which will handle meal selection
-    setSelectedFood(food);
+    // Directly add to diary - no initial popup
+    // This will be handled by the Diary page's Add From Library modal
+    if (onAddToMeal) {
+      // If called from Diary, it will handle the meal selection
+      // For now, just trigger the Log screen
+      setSelectedFood(food);
+      setShowLogSheet(true);
+    }
   };
 
   return (
@@ -93,7 +99,7 @@ export function FoodLibraryScreen({ onAddToMeal, onQuickAdd }: FoodLibraryScreen
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search foods, meals, recipes…"
+            placeholder="Search foods, recipes…"
             className="h-[50px] w-full rounded-xl border-0 bg-gray-100 px-10 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary dark:bg-dark-card dark:text-dark-text dark:focus:bg-dark-hover"
             style={{ borderRadius: "12px" }}
           />
@@ -172,14 +178,25 @@ export function FoodLibraryScreen({ onAddToMeal, onQuickAdd }: FoodLibraryScreen
         </div>
       </main>
 
-      {/* Food Detail Sheet */}
-      {selectedFood && (
+      {/* Food Detail Sheet - Only shown after clicking "Log" */}
+      {selectedFood && showLogSheet && (
         <FoodDetailSheet
-          isOpen={!!selectedFood}
-          onClose={() => setSelectedFood(null)}
+          isOpen={showLogSheet}
+          onClose={() => {
+            setShowLogSheet(false);
+            setSelectedFood(null);
+          }}
           foodItem={selectedFood}
-          onAddToMeal={(mealType) => onAddToMeal?.(selectedFood, mealType)}
-          onQuickAdd={() => onQuickAdd?.(selectedFood)}
+          onAddToMeal={(mealType, quantity) => {
+            onAddToMeal?.(selectedFood, mealType, quantity);
+            setShowLogSheet(false);
+            setSelectedFood(null);
+          }}
+          onQuickAdd={(quantity) => {
+            onQuickAdd?.(selectedFood);
+            setShowLogSheet(false);
+            setSelectedFood(null);
+          }}
         />
       )}
     </div>

@@ -2,15 +2,15 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MoreVertical, Sparkles, Plus, Share2 } from "lucide-react";
+import { MoreVertical, Share2 } from "lucide-react";
 
 interface MealActionsMenuProps {
-  onAIClick: (e?: React.MouseEvent) => void;
-  onAddClick: (e?: React.MouseEvent) => void;
+  onAIClick?: (e?: React.MouseEvent) => void;
+  onAddClick?: (e?: React.MouseEvent) => void;
   onShareClick: (e?: React.MouseEvent) => void;
 }
 
-export function MealActionsMenu({ onAIClick, onAddClick, onShareClick }: MealActionsMenuProps) {
+export function MealActionsMenu({ onShareClick }: MealActionsMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -43,26 +43,6 @@ export function MealActionsMenu({ onAIClick, onAddClick, onShareClick }: MealAct
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
             <div className="p-1">
-              <button
-                onClick={() => {
-                  onAIClick();
-                  setIsOpen(false);
-                }}
-                className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                AI Suggestions
-              </button>
-              <button
-                onClick={() => {
-                  onAddClick();
-                  setIsOpen(false);
-                }}
-                className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                <Plus className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                Add Food
-              </button>
               <button
                 onClick={() => {
                   onShareClick();

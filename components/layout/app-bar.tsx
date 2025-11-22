@@ -6,12 +6,15 @@ import { Share2, Settings, MoreVertical } from "lucide-react";
 
 interface AppBarProps {
   title: string | ReactNode;
-  rightAction?: "share" | "settings" | "overflow" | ReactNode;
+  rightAction?: "share" | "settings" | "overflow" | ReactNode | null;
   onRightActionClick?: () => void;
 }
 
 export function AppBar({ title, rightAction = "overflow", onRightActionClick }: AppBarProps) {
   const renderRightAction = () => {
+    if (rightAction === null) {
+      return null;
+    }
     if (typeof rightAction !== "string") {
       return rightAction;
     }

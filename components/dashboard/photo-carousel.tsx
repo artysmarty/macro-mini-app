@@ -36,6 +36,9 @@ export function PhotoCarousel() {
   return (
     <>
       <div className="rounded-xl border border-gray-300 bg-white overflow-hidden shadow-card dark:border-dark-border dark:bg-dark-card dark:shadow-card-dark">
+        <div className="border-b border-gray-300 px-4 py-3 dark:border-dark-border">
+          <h2 className="text-base font-semibold text-gray-900 dark:text-dark-text">Progress Photos</h2>
+        </div>
         <div className="relative aspect-[4/3] bg-gray-100 dark:bg-gray-800">
           {mockPhotos[currentIndex] && (
             <button

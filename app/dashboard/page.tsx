@@ -17,7 +17,7 @@ export default function DashboardPage() {
   return (
     <MainLayout>
       <div className="flex min-h-screen flex-col">
-        <AppBar title="Dashboard" />
+        <AppBar title="Dashboard" rightAction={null} />
         <MacroSummaryBar onLogFoodClick={() => setShowAddSheet(true)} />
         
         <main className="flex-1 space-y-4 p-4 pb-24">

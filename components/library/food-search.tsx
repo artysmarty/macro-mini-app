@@ -51,7 +51,7 @@ const mockFoods: FoodItem[] = [
 export function FoodSearch({ query }: FoodSearchProps) {
   const { address } = useAccount();
   const [foods, setFoods] = useState<FoodItem[]>(mockFoods);
-  const [selectedType, setSelectedType] = useState<"all" | "foods" | "meals" | "recipes">("all");
+  const [selectedType, setSelectedType] = useState<"all" | "foods" | "recipes">("all");
 
   useEffect(() => {
     // TODO: Fetch from API based on query
@@ -74,7 +74,7 @@ export function FoodSearch({ query }: FoodSearchProps) {
     <div className="space-y-4">
       {/* Filter Tabs */}
       <div className="flex gap-2 overflow-x-auto">
-        {(["all", "foods", "meals", "recipes"] as const).map((type) => (
+        {(["all", "foods", "recipes"] as const).map((type) => (
           <button
             key={type}
             onClick={() => setSelectedType(type)}
