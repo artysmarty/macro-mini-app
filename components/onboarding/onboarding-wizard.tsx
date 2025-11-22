@@ -102,7 +102,15 @@ export function OnboardingWizard() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...userData, onboardingCompleted: true }),
         });
+        if (!newUserResponse.ok) {
+          throw new Error("Failed to create user");
+        }
         user = await newUserResponse.json();
+      }
+      
+      // Ensure user exists before continuing
+      if (!user || !user.id) {
+        throw new Error("Failed to create or retrieve user");
       }
       
       // Calculate and save macros if auto mode
@@ -125,7 +133,7 @@ export function OnboardingWizard() {
       }
       
       // Save photo if provided (optional)
-      if (data.photo) {
+      if (data.photo && user.id) {
         const formData = new FormData();
         formData.append("photo", data.photo);
         formData.append("userId", user.id);
