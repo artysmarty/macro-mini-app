@@ -27,7 +27,7 @@
     "tagline": "Track macros, earn rewards",
     "ogTitle": "Macro Tracker",
     "ogDescription": "Track macros, earn rewards, and join fitness challenges on Base",
-    "ogImageUrl": "https://macro-tracker.vercel.app/og-image.png",
+    "ogImageUrl": "https://macro-tracker.vercel.app/hero.png",
     "webhookUrl": "https://macro-tracker.vercel.app/api/webhook",
     "noindex": true
   }
