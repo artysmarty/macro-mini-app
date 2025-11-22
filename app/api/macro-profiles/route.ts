@@ -37,3 +37,22 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const profile = await createMacroProfile({
+      userId: body.userId,
+      dailyCalories: body.dailyCalories,
+      proteinG: body.proteinG,
+      carbsG: body.carbsG,
+      fatsG: body.fatsG,
+      source: body.source || "manual",
+    });
+
+    return NextResponse.json(profile, { status: 200 });
+  } catch (error) {
+    console.error("Error updating macro profile:", error);
+    return NextResponse.json({ error: "Failed to update macro profile" }, { status: 500 });
+  }
+}
+

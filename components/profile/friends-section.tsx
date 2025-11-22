@@ -62,7 +62,7 @@ export function FriendsSection() {
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          <h3 className="text-lg font-semibold">Friends & Followers</h3>
+          <h3 className="text-lg font-semibold">Friends</h3>
         </div>
         <button
           onClick={handleInviteFriend}

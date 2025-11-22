@@ -5,15 +5,8 @@ import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { format } from "date-fns";
 
-// Mock data - will be replaced with actual API data
-// Arms and thighs are averages of left and right sides
-const mockMeasurementData = [
-  { date: "2024-01-01", butt: 95, waist: 85, chest: 100, arms: 32, hips: 95, thighs: 55 },
-  { date: "2024-01-08", butt: 94.5, waist: 84, chest: 101, arms: 32.5, hips: 94, thighs: 55.5 },
-  { date: "2024-01-15", butt: 94, waist: 83, chest: 102, arms: 33, hips: 93, thighs: 56 },
-  { date: "2024-01-22", butt: 93.5, waist: 82, chest: 103, arms: 33.5, hips: 92, thighs: 56.5 },
-  { date: "2024-01-29", butt: 93, waist: 81, chest: 104, arms: 34, hips: 91, thighs: 57 },
-];
+// Empty - measurement data will be fetched from API
+const mockMeasurementData: Array<{ date: string; butt: number; waist: number; chest: number; arms: number; hips: number; thighs: number }> = [];
 
 type MeasurementKey = "butt" | "waist" | "chest" | "arms" | "hips" | "thighs";
 
@@ -38,6 +31,14 @@ export function BodyMeasurementsChart() {
     hips: true,
     thighs: true,
   });
+
+  if (mockMeasurementData.length === 0) {
+    return (
+      <div className="rounded-xl border border-gray-300 bg-white p-8 text-center shadow-card dark:border-dark-border dark:bg-dark-card dark:shadow-card-dark">
+        <p className="text-sm text-gray-500 dark:text-gray-400">No measurement data yet</p>
+      </div>
+    );
+  }
 
   const data = mockMeasurementData.map((item) => ({
     ...item,

@@ -28,16 +28,23 @@ function calculateBMR(weight: number, height: number, age: number, gender: "male
 
 /**
  * Calculate Total Daily Energy Expenditure (TDEE)
+ * Activity multipliers:
+ * - Sedentary: 1.2 (little or no exercise)
+ * - Lightly Active: 1.375 (light exercise 1–3 days/week)
+ * - Moderately Active: 1.55 (moderate exercise 3–5 days/week)
+ * - Very Active: 1.725 (hard exercise 6–7 days/week)
+ * - Extremely Active: 1.9 (hard daily exercise/physical job)
  */
 function calculateTDEE(bmr: number, activityLevel: User["activityLevel"]): number {
-  const multipliers = {
+  const multipliers: Record<string, number> = {
     sedentary: 1.2,
-    light: 1.375,
-    moderate: 1.55,
-    high: 1.725,
+    lightly_active: 1.375,
+    moderately_active: 1.55,
+    very_active: 1.725,
+    extremely_active: 1.9,
   };
 
-  const multiplier = multipliers[activityLevel || "sedentary"];
+  const multiplier = multipliers[activityLevel || "sedentary"] || 1.2;
   return bmr * multiplier;
 }
 
@@ -69,16 +76,15 @@ export function calculateMacros(user: User): MacroTargets {
       break;
   }
 
-  // Calculate macros (standard split for general fitness)
-  // Protein: 2.2g per kg body weight (or 25-30% of calories)
-  const proteinG = Math.max(user.weight * 2.2, (calorieTarget * 0.25) / 4);
+  // Calculate macros using 40% carbs, 30% protein, 30% fat split
+  // Protein: 30% of calories (4 calories per gram)
+  const proteinG = (calorieTarget * 0.30) / 4;
 
-  // Fats: 25-30% of calories (1g fat = 9 calories)
-  const fatsG = (calorieTarget * 0.27) / 9;
+  // Carbs: 40% of calories (4 calories per gram)
+  const carbsG = (calorieTarget * 0.40) / 4;
 
-  // Carbs: Remaining calories
-  const remainingCalories = calorieTarget - (proteinG * 4) - (fatsG * 9);
-  const carbsG = remainingCalories / 4;
+  // Fats: 30% of calories (9 calories per gram)
+  const fatsG = (calorieTarget * 0.30) / 9;
 
   return {
     calories: Math.round(calorieTarget),

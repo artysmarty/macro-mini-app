@@ -7,26 +7,8 @@ import { Users, Clock, Coins, Trophy, ArrowRight } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import type { Challenge } from "@/types";
 
-// Mock challenges - will be replaced with API data
-const mockChallenges: Challenge[] = [
-  {
-    id: "1",
-    creatorUserId: "user1",
-    name: "30 Day Weight Loss Challenge",
-    description: "Lose 5% body weight in 30 days",
-    durationWeeks: 4,
-    goalType: "weight_loss_percent",
-    entryStakeAmount: "100",
-    entryStakeToken: "project_token",
-    rules: { targetWeightLossPercent: 5 },
-    startDate: new Date(),
-    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    potSize: "5000",
-    status: "active",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
+// Empty - challenges will be fetched from API
+const mockChallenges: Challenge[] = [];
 
 type Filter = "all" | "active" | "open" | "my-challenges";
 

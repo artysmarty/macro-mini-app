@@ -33,10 +33,11 @@ const goals: { value: User["goal"]; label: string; description: string }[] = [
 ];
 
 const activityLevels: { value: User["activityLevel"]; label: string; description: string }[] = [
-  { value: "sedentary", label: "Sedentary", description: "Little to no exercise" },
-  { value: "light", label: "Light", description: "Light exercise 1-3 days/week" },
-  { value: "moderate", label: "Moderate", description: "Moderate exercise 3-5 days/week" },
-  { value: "high", label: "High", description: "Intense exercise 6-7 days/week" },
+  { value: "sedentary", label: "Sedentary", description: "Little or no exercise" },
+  { value: "lightly_active", label: "Lightly Active", description: "Light exercise 1–3 days/week" },
+  { value: "moderately_active", label: "Moderately Active", description: "Moderate exercise 3–5 days/week" },
+  { value: "very_active", label: "Very Active", description: "Hard exercise 6–7 days/week" },
+  { value: "extremely_active", label: "Extremely Active", description: "Hard daily exercise/physical job" },
 ];
 
 export function GoalStep({ data, onUpdate }: GoalStepProps) {

@@ -5,12 +5,8 @@ import { useState } from "react";
 import { Image as ImageIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 
-// Mock photos - will be replaced with actual API data
-const mockPhotos = [
-  { id: "1", date: "2024-01-01", url: "/placeholder.jpg" },
-  { id: "2", date: "2024-01-08", url: "/placeholder.jpg" },
-  { id: "3", date: "2024-01-15", url: "/placeholder.jpg" },
-];
+// Empty - photos will be fetched from API
+const mockPhotos: Array<{ id: string; date: string; url: string }> = [];
 
 export function PhotoCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);

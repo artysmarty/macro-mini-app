@@ -1,7 +1,8 @@
 // types/index.ts
 export interface User {
   id: string;
-  walletAddress: string;
+  walletAddress?: string; // Optional for Farcaster users
+  fid?: number; // Farcaster ID
   displayName?: string;
   avatar?: string;
   age?: number;
@@ -9,8 +10,9 @@ export interface User {
   weight?: number; // kg
   gender?: "male" | "female" | "other";
   goal?: "lose_weight" | "gain_muscle" | "recomposition" | "maintain";
-  activityLevel?: "sedentary" | "light" | "moderate" | "high";
+  activityLevel?: "sedentary" | "lightly_active" | "moderately_active" | "very_active" | "extremely_active";
   bodyMeasurements?: BodyMeasurements;
+  onboardingCompleted?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

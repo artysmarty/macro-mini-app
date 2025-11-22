@@ -40,11 +40,38 @@ export const db = {
 // Helper functions for database operations
 export async function getUserByWallet(walletAddress: string): Promise<User | null> {
   for (const user of db.users.values()) {
-    if (user.walletAddress.toLowerCase() === walletAddress.toLowerCase()) {
+    if (user.walletAddress?.toLowerCase() === walletAddress.toLowerCase()) {
       return user;
     }
   }
   return null;
+}
+
+export async function getUserByFid(fid: number): Promise<User | null> {
+  for (const user of db.users.values()) {
+    if (user.fid === fid) {
+      return user;
+    }
+  }
+  return null;
+}
+
+export async function getUserById(userId: string): Promise<User | null> {
+  return db.users.get(userId) || null;
+}
+
+export async function updateUser(userId: string, updates: Partial<Omit<User, "id" | "createdAt">>): Promise<User> {
+  const user = db.users.get(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const updatedUser: User = {
+    ...user,
+    ...updates,
+    updatedAt: new Date(),
+  };
+  db.users.set(userId, updatedUser);
+  return updatedUser;
 }
 
 export async function createUser(user: Omit<User, "id" | "createdAt" | "updatedAt">): Promise<User> {
@@ -71,9 +98,11 @@ export async function getMacroProfile(userId: string): Promise<MacroProfile | nu
 
 export async function createMacroProfile(profile: Omit<MacroProfile, "createdAt" | "updatedAt">): Promise<MacroProfile> {
   const now = new Date();
+  // Check if profile already exists - if so, update it
+  const existing = await getMacroProfile(profile.userId);
   const newProfile: MacroProfile = {
     ...profile,
-    createdAt: now,
+    createdAt: existing?.createdAt || now,
     updatedAt: now,
   };
   db.macroProfiles.set(profile.userId, newProfile);

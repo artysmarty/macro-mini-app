@@ -11,42 +11,8 @@ interface FoodSearchProps {
   query: string;
 }
 
-// Mock data - will be replaced with actual API
-const mockFoods: FoodItem[] = [
-  {
-    id: "1",
-    name: "Chicken Breast",
-    brand: "Generic",
-    servingSize: "100g",
-    calories: 165,
-    proteinG: 31,
-    carbsG: 0,
-    fatsG: 3.6,
-    isPublic: true,
-  },
-  {
-    id: "2",
-    name: "Brown Rice",
-    brand: "Generic",
-    servingSize: "100g cooked",
-    calories: 111,
-    proteinG: 2.6,
-    carbsG: 23,
-    fatsG: 0.9,
-    isPublic: true,
-  },
-  {
-    id: "3",
-    name: "Broccoli",
-    brand: "Generic",
-    servingSize: "100g",
-    calories: 34,
-    proteinG: 2.8,
-    carbsG: 7,
-    fatsG: 0.4,
-    isPublic: true,
-  },
-];
+// Empty - foods will be fetched from API
+const mockFoods: FoodItem[] = [];
 
 export function FoodSearch({ query }: FoodSearchProps) {
   const { address } = useAccount();

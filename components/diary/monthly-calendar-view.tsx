@@ -11,21 +11,8 @@ interface MonthlyCalendarViewProps {
   onDateSelect?: (date: Date) => void;
 }
 
-// Mock data - will be replaced with actual API
-const mockMacroHitDays = [
-  "2024-01-01",
-  "2024-01-02",
-  "2024-01-05",
-  "2024-01-07",
-  "2024-01-10",
-  "2024-01-12",
-  "2024-01-15",
-  "2024-01-18",
-  "2024-01-20",
-  "2024-01-22",
-  "2024-01-25",
-  "2024-01-28",
-];
+// Empty - macro hit days will be fetched from API
+const mockMacroHitDays: string[] = [];
 
 export function MonthlyCalendarView({ onClose, onDateSelect }: MonthlyCalendarViewProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());

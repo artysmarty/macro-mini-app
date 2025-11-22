@@ -3,7 +3,6 @@
 
 import { useTheme, type Theme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
-import { ColorPicker } from "./color-picker";
 
 const themes: { value: Theme; label: string; color: string }[] = [
   { value: "light", label: "Light", color: "bg-gray-100" },
@@ -35,8 +34,6 @@ export function ThemeSelector() {
           ))}
         </div>
       </div>
-
-      <ColorPicker />
     </div>
   );
 }

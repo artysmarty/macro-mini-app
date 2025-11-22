@@ -3,6 +3,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useMacroLog } from "@/hooks/use-macro-log";
+import { useMacroProfile } from "@/hooks/use-macro-profile";
 import { useAuth } from "@/contexts/auth-context";
 import { format } from "date-fns";
 
@@ -109,12 +110,19 @@ export function MacroSummaryBar({ onLogFoodClick, date }: MacroSummaryBarProps) 
   
   const userId = getUserId();
   const { data: macroLog, isLoading } = useMacroLog(dateString, userId);
+  const { data: macroProfile } = useMacroProfile(userId);
   const [viewIndex, setViewIndex] = useState(0); // 0 = macros, 1 = micros
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const targetMacros = {
+  // Use macro profile if available, otherwise use defaults
+  const targetMacros = macroProfile ? {
+    calories: macroProfile.dailyCalories,
+    protein: macroProfile.proteinG,
+    carbs: macroProfile.carbsG,
+    fats: macroProfile.fatsG,
+  } : {
     calories: 2400,
     protein: 180,
     carbs: 240,

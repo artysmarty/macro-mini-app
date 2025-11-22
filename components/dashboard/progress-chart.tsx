@@ -4,16 +4,18 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
 
-// Mock data - will be replaced with actual API data
-const mockWeightData = [
-  { date: "2024-01-01", weight: 75 },
-  { date: "2024-01-08", weight: 74.5 },
-  { date: "2024-01-15", weight: 74 },
-  { date: "2024-01-22", weight: 73.5 },
-  { date: "2024-01-29", weight: 73 },
-];
+// Empty - weight data will be fetched from API
+const mockWeightData: Array<{ date: string; weight: number }> = [];
 
 export function ProgressChart() {
+  if (mockWeightData.length === 0) {
+    return (
+      <div className="rounded-xl border border-gray-300 bg-white p-8 text-center shadow-card dark:border-dark-border dark:bg-dark-card dark:shadow-card-dark">
+        <p className="text-sm text-gray-500 dark:text-gray-400">No weight data yet</p>
+      </div>
+    );
+  }
+
   const data = mockWeightData.map((item) => ({
     ...item,
     date: format(new Date(item.date), "MMM d"),

@@ -13,33 +13,8 @@ interface BarcodeScannerModalProps {
   onAdd: (food: FoodItem) => void;
 }
 
-// Mock barcode lookup - in production, use a real API like Open Food Facts or Nutritionix
-const mockBarcodeDB: Record<string, FoodItem> = {
-  "049000042563": {
-    id: "barcode-1",
-    name: "Quaker Oats Old Fashioned",
-    brand: "Quaker",
-    servingSize: "1/2 cup (40g)",
-    calories: 150,
-    proteinG: 5,
-    carbsG: 27,
-    fatsG: 3,
-    barcode: "049000042563",
-    isPublic: true,
-  },
-  "049000042570": {
-    id: "barcode-2",
-    name: "Grilled Salmon Fillet",
-    brand: "Fresh Catch",
-    servingSize: "150g",
-    calories: 280,
-    proteinG: 39,
-    carbsG: 0,
-    fatsG: 12,
-    barcode: "049000042570",
-    isPublic: true,
-  },
-};
+// Empty - barcode lookup will use a real API like Open Food Facts or Nutritionix
+const mockBarcodeDB: Record<string, FoodItem> = {};
 
 export function BarcodeScannerModal({ isOpen, onClose, mealType, onAdd }: BarcodeScannerModalProps) {
   const [scanning, setScanning] = useState(false);

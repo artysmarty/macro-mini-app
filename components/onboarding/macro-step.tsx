@@ -9,10 +9,14 @@ import type { MacroTargets } from "@/lib/macro-calculator";
 interface MacroStepProps {
   data: Partial<User>;
   onUpdate: (updates: Partial<User>) => void;
+  mode?: "auto" | "manual";
+  onModeChange?: (mode: "auto" | "manual") => void;
 }
 
-export function MacroStep({ data, onUpdate }: MacroStepProps) {
-  const [mode, setMode] = useState<"auto" | "manual">("auto");
+export function MacroStep({ data, onUpdate, mode: externalMode, onModeChange }: MacroStepProps) {
+  const [internalMode, setInternalMode] = useState<"auto" | "manual">("auto");
+  const mode = externalMode !== undefined ? externalMode : internalMode;
+  const setMode = onModeChange || setInternalMode;
   const [calculatedMacros, setCalculatedMacros] = useState<MacroTargets | null>(null);
 
   useEffect(() => {

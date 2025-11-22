@@ -13,53 +13,8 @@ interface AddFromLibraryModalProps {
   onAdd: (food: FoodItem, quantity?: number) => void;
 }
 
-// Mock foods - in production, fetch from API
-const mockFoods: FoodItem[] = [
-  {
-    id: "1",
-    name: "Chicken Breast",
-    brand: "Generic",
-    servingSize: "100g",
-    calories: 165,
-    proteinG: 31,
-    carbsG: 0,
-    fatsG: 3.6,
-    isPublic: true,
-  },
-  {
-    id: "2",
-    name: "Brown Rice",
-    brand: "Generic",
-    servingSize: "100g cooked",
-    calories: 111,
-    proteinG: 2.6,
-    carbsG: 23,
-    fatsG: 0.9,
-    isPublic: true,
-  },
-  {
-    id: "3",
-    name: "Broccoli",
-    brand: "Generic",
-    servingSize: "100g",
-    calories: 34,
-    proteinG: 2.8,
-    carbsG: 7,
-    fatsG: 0.4,
-    isPublic: true,
-  },
-  {
-    id: "demo-1",
-    name: "Grilled Salmon",
-    brand: "Demo Food",
-    servingSize: "150g",
-    calories: 280,
-    proteinG: 39,
-    carbsG: 0,
-    fatsG: 12,
-    isPublic: true,
-  },
-];
+// Empty - foods will be fetched from API
+const mockFoods: FoodItem[] = [];
 
 export function AddFromLibraryModal({ isOpen, onClose, mealType, onAdd }: AddFromLibraryModalProps) {
   const [searchQuery, setSearchQuery] = useState("");

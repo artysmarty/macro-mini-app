@@ -31,7 +31,7 @@ export default function ProfilePage() {
   const tabs: { id: ProfileTab; label: string }[] = [
     { id: "overview", label: "Overview" },
     { id: "workouts", label: "Workouts" },
-    { id: "friends", label: "Friends & Followers" },
+    { id: "friends", label: "Friends" },
   ];
 
   return (

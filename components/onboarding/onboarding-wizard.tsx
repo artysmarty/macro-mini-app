@@ -11,6 +11,7 @@ import { MeasurementsStep } from "./measurements-step";
 import { PhotoStep } from "./photo-step";
 import type { User, BodyMeasurements } from "@/types";
 import { calculateMacros } from "@/lib/macro-calculator";
+import { useAuth } from "@/contexts/auth-context";
 
 interface OnboardingData {
   profile: Partial<User>;
@@ -20,10 +21,13 @@ interface OnboardingData {
 
 export function OnboardingWizard() {
   const router = useRouter();
+  const { fid } = useAuth();
   const [step, setStep] = useState(1);
   const [data, setData] = useState<OnboardingData>({
     profile: {},
   });
+  const [macroMode, setMacroMode] = useState<"auto" | "manual">("auto");
+  const [isSaving, setIsSaving] = useState(false);
 
   const totalSteps = 5;
 
@@ -57,22 +61,87 @@ export function OnboardingWizard() {
   };
 
   const handleComplete = async () => {
+    if (isSaving) return;
+    
+    setIsSaving(true);
     try {
-      // Calculate macros if not manually set
-      if (!data.profile.goal || data.profile.weight || data.profile.height) {
-        const user = data.profile as User;
-        if (user.weight && user.height && user.age && user.gender && user.goal) {
-          const macros = calculateMacros(user);
-          // TODO: Save to API
-        }
+      // Get or create user
+      const userId = fid ? `fid-${fid}` : `user-${Date.now()}`;
+      
+      // Check if user exists
+      let userResponse = await fetch(`/api/users?fid=${fid || ""}`);
+      let user: User | null = null;
+      
+      if (userResponse.ok) {
+        user = await userResponse.json();
       }
-
-      // TODO: Save profile, measurements, photo to API
-      // TODO: Mark onboarding as complete
+      
+      // Prepare user data
+      const userData: Partial<User> = {
+        fid: fid || undefined,
+        age: data.profile.age,
+        height: data.profile.height,
+        weight: data.profile.weight,
+        gender: data.profile.gender,
+        goal: data.profile.goal,
+        activityLevel: data.profile.activityLevel,
+        bodyMeasurements: data.measurements,
+        onboardingCompleted: true,
+      };
+      
+      // Save or update user
+      if (user) {
+        await fetch("/api/users", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: user.id, ...userData }),
+        });
+      } else {
+        const newUserResponse = await fetch("/api/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...userData, onboardingCompleted: true }),
+        });
+        user = await newUserResponse.json();
+      }
+      
+      // Calculate and save macros if auto mode
+      if (macroMode === "auto" && data.profile.weight && data.profile.height && data.profile.age && data.profile.gender && data.profile.goal) {
+        const userForCalc = data.profile as User;
+        const macros = calculateMacros(userForCalc);
+        
+        await fetch("/api/macro-profiles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: user.id,
+            dailyCalories: macros.calories,
+            proteinG: macros.proteinG,
+            carbsG: macros.carbsG,
+            fatsG: macros.fatsG,
+            source: "computed",
+          }),
+        });
+      }
+      
+      // Save photo if provided (optional)
+      if (data.photo) {
+        const formData = new FormData();
+        formData.append("photo", data.photo);
+        formData.append("userId", user.id);
+        formData.append("date", new Date().toISOString().split("T")[0]);
+        formData.append("type", "front");
+        await fetch("/api/photos", {
+          method: "POST",
+          body: formData,
+        });
+      }
 
       router.push("/dashboard");
     } catch (error) {
       console.error("Error completing onboarding:", error);
+      alert("Failed to save onboarding data. Please try again.");
+      setIsSaving(false);
     }
   };
 
@@ -118,7 +187,7 @@ export function OnboardingWizard() {
       <div className="min-h-[400px]">
         {step === 1 && <ProfileStep data={data.profile} onUpdate={updateProfile} />}
         {step === 2 && <GoalStep data={data.profile} onUpdate={updateProfile} />}
-        {step === 3 && <MacroStep data={data.profile} onUpdate={updateProfile} />}
+        {step === 3 && <MacroStep data={data.profile} onUpdate={updateProfile} mode={macroMode} onModeChange={setMacroMode} />}
         {step === 4 && (
           <MeasurementsStep
             data={data.measurements}
@@ -140,11 +209,11 @@ export function OnboardingWizard() {
         </button>
         <button
           onClick={handleNext}
-          disabled={!canProceed()}
+          disabled={!canProceed() || isSaving}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white disabled:opacity-50 hover:bg-blue-700"
         >
-          {step === totalSteps ? "Complete" : "Next"}
-          {step < totalSteps && <ChevronRight className="h-4 w-4" />}
+          {isSaving ? "Saving..." : step === totalSteps ? "Complete" : "Next"}
+          {step < totalSteps && !isSaving && <ChevronRight className="h-4 w-4" />}
         </button>
       </div>
     </div>
