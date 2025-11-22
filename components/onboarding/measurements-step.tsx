@@ -16,6 +16,7 @@ export function MeasurementsStep({ data, onUpdate }: MeasurementsStepProps) {
     hips: data?.hips?.toString() || "",
     arms: data?.arms?.toString() || "",
     thighs: data?.thighs?.toString() || "",
+    butt: data?.butt?.toString() || "",
   });
 
   const handleChange = (key: keyof BodyMeasurements, value: string) => {
@@ -27,6 +28,7 @@ export function MeasurementsStep({ data, onUpdate }: MeasurementsStepProps) {
       hips: updated.hips ? parseFloat(updated.hips) : undefined,
       arms: updated.arms ? parseFloat(updated.arms) : undefined,
       thighs: updated.thighs ? parseFloat(updated.thighs) : undefined,
+      butt: updated.butt ? parseFloat(updated.butt) : undefined,
     });
   };
 
