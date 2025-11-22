@@ -9,16 +9,18 @@ import { format } from "date-fns";
 interface ShareDayModalProps {
   isOpen: boolean;
   onClose: () => void;
+  date?: Date; // Optional date, defaults to today
 }
 
-export function ShareDayModal({ isOpen, onClose }: ShareDayModalProps) {
+export function ShareDayModal({ isOpen, onClose, date }: ShareDayModalProps) {
   const [copied, setCopied] = useState(false);
   const composeCast = useComposeCast();
-  const today = format(new Date(), "EEEE, MMM d, yyyy");
+  const targetDate = date || new Date();
+  const today = format(targetDate, "EEEE, MMM d, yyyy");
 
   const generateShareLink = () => {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-    const dayId = `day-${format(new Date(), "yyyy-MM-dd")}`;
+    const dayId = `day-${format(targetDate, "yyyy-MM-dd")}`;
     return `${baseUrl}/shared/day/${dayId}`;
   };
 

@@ -195,6 +195,7 @@ export function MealSection({ mealType, selectedDate = new Date(), onAddClick }:
           mealType={mealType}
           entries={entries}
           onClose={() => setShowShareModal(false)}
+          date={selectedDate}
         />
       )}
     </>

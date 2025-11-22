@@ -186,7 +186,8 @@ export default function DiaryPage() {
       
       <ShareDayModal 
         isOpen={showShareDay} 
-        onClose={() => setShowShareDay(false)} 
+        onClose={() => setShowShareDay(false)}
+        date={selectedDate}
       />
     </MainLayout>
   );

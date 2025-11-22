@@ -6,6 +6,7 @@ import { sdk } from "@farcaster/miniapp-sdk";
 
 interface ShareAchievementProps {
   achievement: {
+    id?: string;
     title: string;
     description: string;
     type: "streak" | "weight" | "milestone";
@@ -14,6 +15,11 @@ interface ShareAchievementProps {
 }
 
 export function ShareAchievement({ achievement }: ShareAchievementProps) {
+  const generateShareLink = () => {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    const achievementId = achievement.id || `achievement-${Date.now()}`;
+    return `${baseUrl}/shared/achievement/${achievementId}`;
+  };
 
   const handleShare = async () => {
     try {
@@ -23,15 +29,17 @@ export function ShareAchievement({ achievement }: ShareAchievementProps) {
         milestone: "🏆",
       }[achievement.type];
 
+      const shareLink = generateShareLink();
+
       const text = `${emoji} ${achievement.title} - ${achievement.description}\n\nJust unlocked this achievement in Macro Tracker! 💪\n\nTrack your macros, earn rewards, and join challenges on Base.`;
 
       const isInMiniApp = await sdk.isInMiniApp();
       
       if (isInMiniApp) {
-        // Use SDK action for mini app
+        // Use SDK action for mini app with shareable link as embed
         sdk.actions.composeCast({
           text,
-          embeds: [window.location.origin],
+          embeds: [shareLink],
         });
       } else {
         // Fallback for browser

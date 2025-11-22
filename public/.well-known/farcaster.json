@@ -25,11 +25,10 @@
     "tags": ["fitness", "macros", "nutrition", "health", "base"],
     "heroImageUrl": "https://macro-tracker.vercel.app/hero.png",
     "tagline": "Track macros, earn rewards",
-    "ogTitle": "Macro Tracker - Base Fitness & Nutrition",
+    "ogTitle": "Macro Tracker",
     "ogDescription": "Track macros, earn rewards, and join fitness challenges on Base",
     "ogImageUrl": "https://macro-tracker.vercel.app/og-image.png",
     "webhookUrl": "https://macro-tracker.vercel.app/api/webhook",
     "noindex": true
   }
 }
-

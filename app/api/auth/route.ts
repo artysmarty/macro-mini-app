@@ -3,15 +3,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, Errors } from "@farcaster/quick-auth";
 
 // Get domain from environment or use localhost for development
+// IMPORTANT: The domain MUST match your Base deployment URL exactly
+// Set NEXT_PUBLIC_APP_URL in Vercel environment variables to your Base deployment URL
 const getDomain = () => {
   const url = process.env.NEXT_PUBLIC_APP_URL;
   if (url) {
     try {
-      return new URL(url).hostname;
+      const parsedUrl = new URL(url);
+      return parsedUrl.hostname;
     } catch {
-      return url;
+      // If URL is invalid, try using it as hostname directly
+      return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
     }
   }
+  // Fallback: In production, use Vercel URL (but NEXT_PUBLIC_APP_URL should be set)
   return process.env.NODE_ENV === "production" ? "macro-tracker.vercel.app" : "localhost";
 };
 

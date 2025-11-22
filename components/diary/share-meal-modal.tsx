@@ -5,10 +5,13 @@ import { useState } from "react";
 import { X, Share2, Check, Copy, UserPlus } from "lucide-react";
 import { useComposeCast } from "@/hooks/use-minikit";
 
+import { format } from "date-fns";
+
 interface ShareMealModalProps {
   mealType: "breakfast" | "lunch" | "dinner" | "snacks";
   entries: any[];
   onClose: () => void;
+  date?: Date; // Optional date, defaults to today
 }
 
 const mealLabels: Record<ShareMealModalProps["mealType"], string> = {
@@ -18,16 +21,17 @@ const mealLabels: Record<ShareMealModalProps["mealType"], string> = {
   snacks: "Snacks",
 };
 
-export function ShareMealModal({ mealType, entries, onClose }: ShareMealModalProps) {
+export function ShareMealModal({ mealType, entries, onClose, date }: ShareMealModalProps) {
   const [copied, setCopied] = useState(false);
   const composeCast = useComposeCast();
   const label = mealLabels[mealType];
+  const targetDate = date || new Date();
+  const dateStr = format(targetDate, "yyyy-MM-dd");
 
   const generateShareLink = () => {
-    // Create a shareable link for the meal
+    // Create a shareable link for the meal with date
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-    // TODO: Generate a meal ID from entries
-    const mealId = `meal-${Date.now()}`;
+    const mealId = `${mealType}-${dateStr}`;
     return `${baseUrl}/shared/meal/${mealId}`;
   };
 

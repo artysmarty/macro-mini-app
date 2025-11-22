@@ -25,6 +25,11 @@ interface NFTEarnedModalProps {
 export function NFTEarnedModal({ nft, onClose }: NFTEarnedModalProps) {
   const [shared, setShared] = useState(false);
 
+  const generateShareLink = () => {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    return `${baseUrl}/shared/award/${nft.id}`;
+  };
+
   const handleShare = async () => {
     try {
       // Format outcome stats for display
@@ -49,6 +54,8 @@ export function NFTEarnedModal({ nft, onClose }: NFTEarnedModalProps) {
         year: "numeric",
       });
 
+      const shareLink = generateShareLink();
+
       let text = `${emoji} Just earned a Progress NFT!\n\n`;
       text += `🏆 ${nft.name}\n`;
       if (statsText) {
@@ -61,10 +68,10 @@ export function NFTEarnedModal({ nft, onClose }: NFTEarnedModalProps) {
       const isInMiniApp = await sdk.isInMiniApp();
 
       if (isInMiniApp) {
-        // Use SDK action for mini app
+        // Use SDK action for mini app with shareable link as embed
         sdk.actions.composeCast({
           text,
-          embeds: nft.imageUrl ? [window.location.origin, nft.imageUrl] : [window.location.origin],
+          embeds: nft.imageUrl ? [shareLink, nft.imageUrl] : [shareLink],
         });
       } else {
         // Fallback for browser
