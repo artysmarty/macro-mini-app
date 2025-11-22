@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/auth-context";
 import type { FoodItem } from "@/types";
 
 // Helper function to get consistent userId (same as in diary page)
-function getUserId(fid: string | null | undefined): string {
+function getUserId(fid: number | null | undefined): string {
   if (fid) {
     return `fid-${fid}`;
   }
