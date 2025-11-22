@@ -1,6 +1,6 @@
 // app/api/users/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { getUserByWallet, createUser } from "@/lib/db/schema";
+import { getUserByWallet, getUserByFid, getUserById, createUser, updateUser } from "@/lib/db/schema";
 import type { User } from "@/types";
 
 export async function GET(request: NextRequest) {
@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
   let user: User | null = null;
   
   if (userId) {
-    const { getUserById } = await import("@/lib/db/schema");
     user = await getUserById(userId);
   } else if (fid) {
     user = await getUserByFid(parseInt(fid));
