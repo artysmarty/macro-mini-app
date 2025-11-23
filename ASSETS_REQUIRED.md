@@ -110,3 +110,4 @@ curl https://your-domain.com/hero.png
 
 The manifest file references these images, but the actual files don't exist yet in your `/public` directory.
 
+

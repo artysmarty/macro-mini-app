@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { OnboardingGuard } from "@/components/onboarding/onboarding-guard";
+import { SDKReady } from "@/components/sdk-ready";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,6 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <SDKReady />
         <Providers>
           <OnboardingGuard>{children}</OnboardingGuard>
         </Providers>

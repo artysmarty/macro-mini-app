@@ -97,3 +97,4 @@ cp ~/Downloads/icon.png "/home/wilbur/Macro Tracker/public/icon.png"
 
 If you tell me where your image files are located, I can provide the exact commands to copy them!
 
+
