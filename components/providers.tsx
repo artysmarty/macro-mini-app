@@ -27,17 +27,27 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Call ready() to signal to Base/Farcaster that the app has loaded
   useEffect(() => {
     async function initializeSDK() {
+      // Wait for app to be fully mounted and initialized
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
       try {
-        const isInMiniApp = await sdk.isInMiniApp();
-        if (isInMiniApp) {
-          // Signal that the mini app is ready
-          await sdk.actions.ready();
-          console.log("Mini app ready signal sent");
+        // Always try to call ready() - Base preview tool and production both need this
+        console.log("[SDK] Attempting to call ready()...");
+        await sdk.actions.ready();
+        console.log("✅ [SDK] Ready signal sent successfully");
+      } catch (error: any) {
+        console.error("❌ [SDK] Error calling ready():", error?.message || error);
+        // Check if we're in a mini app environment for logging
+        try {
+          const isInMiniApp = await sdk.isInMiniApp();
+          console.log("[SDK] isInMiniApp:", isInMiniApp);
+        } catch (checkError) {
+          console.error("[SDK] Could not check isInMiniApp:", checkError);
         }
-      } catch (error) {
-        console.error("Error initializing SDK ready state:", error);
       }
     }
+    
+    // Initialize after component mounts
     initializeSDK();
   }, []);
 
