@@ -33,6 +33,35 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Call SDK ready() as early as possible
+              (function() {
+                if (typeof window !== 'undefined') {
+                  window.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(function() {
+                      try {
+                        // Try to call ready() if SDK is available
+                        if (window.farcaster && window.farcaster.miniapp) {
+                          window.farcaster.miniapp.actions.ready().then(function() {
+                            console.log('[Inline Script] ✅ SDK ready() called successfully');
+                          }).catch(function(e) {
+                            console.error('[Inline Script] ❌ SDK ready() error:', e);
+                          });
+                        }
+                      } catch (e) {
+                        console.error('[Inline Script] Error accessing SDK:', e);
+                      }
+                    }, 100);
+                  });
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <SDKReady />
         <Providers>
